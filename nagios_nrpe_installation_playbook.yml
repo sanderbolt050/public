@@ -44,7 +44,23 @@
       lineinfile:
         path: /usr/local/nagios/etc/nrpe.cfg
         regexp: '^allowed_hosts='
-        line: 'allowed_hosts=127.0.0.1,10.1.0.9'
+        line: 'allowed_hosts=127.0.0.1,10.1.0.9,10.1.0.6'
+    
+    - name: Installeer firewalld en Python-bindings
+      apt:
+        name:
+          - firewalld
+          - python3-firewall
+        state: present
+    - name: Sta NRPE-poort toe in iptables
+      shell: iptables -A INPUT -p tcp -m tcp --dport 5666 -j ACCEPT
+    
+    - name: Start en activeer firewalld
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+
 
     - name: Allow NRPE port in firewall
       firewalld:
