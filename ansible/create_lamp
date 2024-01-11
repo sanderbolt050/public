@@ -1,0 +1,43 @@
+- hosts: all
+  become: yes  # Gebruik sudo rechten
+  tasks:
+  - name: Update apt cache
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600 # Cache is geldig voor 1 uur
+
+  - name: Installeer Apache2
+    apt:
+      name: apache2
+      state: present
+
+  - name: Installeer PHP
+    apt:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - php
+      - php-mysql
+      - libapache2-mod-php
+      - php-cli
+      - php-fpm
+      - php-json
+      - php-common
+      - php-mysql
+      - php-zip
+      - php-gd
+      - php-mbstring
+      - php-curl
+      - php-xml
+      - php-pear
+      - php-bcmath
+
+  - name: Installeer MySQL Server
+    apt:
+      name: mysql-server
+      state: present
+
+  - name: Herstart Apache2 om PHP te activeren
+    service:
+      name: apache2
+      state: restarted
