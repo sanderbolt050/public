@@ -1,0 +1,22 @@
+- name: Download NRPE
+  get_url:
+    url: https://github.com/NagiosEnterprises/nrpe/releases/download/nrpe-4.0.2/nrpe-4.0.2.tar.gz
+    dest: /tmp/nrpe-4.0.2.tar.gz
+
+- name: Pak NRPE uit
+  unarchive:
+    src: /tmp/nrpe-4.0.2.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Configureer NRPE
+  shell: ./configure
+  args:
+    chdir: /tmp/nrpe-4.0.2
+
+- name: Compileer NRPE
+  shell: make all
+  args:
+    chdir: /tmp/nrpe-4.0.2
+
+# Enzovoort voor de andere make commando's
