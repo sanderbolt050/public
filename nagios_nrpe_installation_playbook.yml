@@ -1,0 +1,59 @@
+
+- hosts: all
+  become: yes  # Use sudo privileges
+  tasks:
+    - name: Install required packages
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - gcc
+          - make
+          - libgd-dev
+
+    - name: Create Nagios user
+      user:
+        name: nagios
+        system: yes
+
+    - name: Download and install Nagios Plugins
+      shell: |
+        wget https://nagios-plugins.org/download/nagios-plugins-2.3.3.tar.gz
+        tar xzf nagios-plugins-2.3.3.tar.gz
+        cd nagios-plugins-2.3.3
+        ./configure
+        make
+        make install
+      args:
+        creates: /usr/local/nagios
+
+    - name: Download and install NRPE
+      shell: |
+        wget https://github.com/NagiosEnterprises/nrpe/releases/download/nrpe-4.0.2/nrpe-4.0.2.tar.gz
+        tar xzf nrpe-4.0.2.tar.gz
+        cd nrpe-4.0.2
+        ./configure
+        make all
+        make install-plugin
+        make install-daemon
+        make install-config
+      args:
+        creates: /usr/local/nagios/bin/nrpe
+
+    - name: Configure NRPE
+      lineinfile:
+        path: /usr/local/nagios/etc/nrpe.cfg
+        regexp: '^allowed_hosts='
+        line: 'allowed_hosts=127.0.0.1,10.1.0.9'
+
+    - name: Allow NRPE port in firewall
+      firewalld:
+        port: 5666/tcp
+        permanent: yes
+        state: enabled
+
+    - name: Restart and enable NRPE service
+      service:
+        name: nrpe
+        state: restarted
+        enabled: yes
