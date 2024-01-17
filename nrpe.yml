@@ -1,0 +1,8 @@
+- name: Installeer Nagios NRPE Server
+  hosts: jouw_servers
+  become: yes
+  tasks:
+    - name: Installeer nagios-nrpe-server
+      apt:
+        name: nagios-nrpe-server
+        state: present
