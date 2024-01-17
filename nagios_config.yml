@@ -1,0 +1,9 @@
+---
+- name: Configureer Nagios Server
+  hosts: jouw_servers
+  become: yes
+  tasks:
+    - name: Maak Nagios configuratiebestanden voor elke server
+      template:
+        src: /pad/naar/server_template.cfg.j2
+        dest: /etc/nagios4/objects/server{{ ansible_host.split('.')[-1] }}.cfg
