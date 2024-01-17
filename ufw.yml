@@ -1,0 +1,6 @@
+- name: Schakel UFW Firewall uit
+  hosts: jouw_servers
+  become: yes
+  tasks:
+    - name: Disable UFW
+      command: ufw disable
