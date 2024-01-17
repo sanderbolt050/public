@@ -1,9 +1,15 @@
 ---
-- name: Configureer Nagios Server
-  hosts: jouw_servers
-  become: yes
+- name: Voer taken uit op localhost
+  hosts: localhost
+  connection: local
+  gather_facts: no
   tasks:
-    - name: Maak Nagios configuratiebestanden voor elke server
+    - name: Lees het IP-adres uit het inventory bestand
+      set_fact:
+        server_ip: "{{ lookup('ini', 'jouw_server_variable_name section=jouw_section_name file=/pad/naar/inventory.ini') }}"
+
+    - name: Maak een configuratiebestand met het server IP
       template:
         src: /pad/naar/server_template.cfg.j2
-        dest: /etc/nagios4/objects/server{{ ansible_host.split('.')[-1] }}.cfg
+        dest: /etc/nagios4/objects/server{{ server_ip.split('.')[-1] }}.cfg
+      when: server_ip is defined
