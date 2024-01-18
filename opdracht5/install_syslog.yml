@@ -47,3 +47,27 @@
         rule: allow
         port: '514'
         proto: udp
+        
+    - name: Verplaats Nagios Apache configuratie naar .old
+      ansible.builtin.command:
+        cmd: mv /etc/apache2/conf-available/nagios4-cgi.conf /etc/apache2/conf-available/nagios4-cgi.conf.old
+        removes: /etc/apache2/conf-available/nagios4-cgi.conf
+        creates: /etc/apache2/conf-available/nagios4-cgi.conf.old
+
+    - name: Maak nieuw Nagios Apache configuratiebestand
+      ansible.builtin.copy:
+        dest: /etc/apache2/conf-available/nagios4-cgi.conf
+        content: |
+          ScriptAlias /cgi-bin/nagios4 /usr/lib/cgi-bin/nagios4
+          ScriptAlias /nagios4/cgi-bin /usr/lib/cgi-bin/nagios4
+          Alias /nagios4/stylesheets /etc/nagios4/stylesheets
+          Alias /nagios4 /usr/share/nagios4/htdocs
+          <DirectoryMatch (/usr/share/nagios4/htdocs|/usr/lib/cgi-bin/nagios4|/etc/nagios4/stylesheets)>
+             Options FollowSymLinks
+             DirectoryIndex index.php index.html
+             AllowOverride AuthConfig
+             Require ip  ::1/128 fc00::/7 fe80::/10 10.0.0.0/8 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.168.0.0/16
+          </DirectoryMatch>
+          <Directory /usr/share/nagios4/htdocs>
+             Options +ExecCGI
+          </Directory>
