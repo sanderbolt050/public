@@ -1,0 +1,49 @@
+---
+- name: Update, upgrade en installeer benodigde pakketten
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade alle pakketten
+      ansible.builtin.apt:
+        upgrade: dist
+
+    - name: Installeer Nagios en NRPE
+      ansible.builtin.apt:
+        name:
+          - nagios4
+          - nagios-nrpe-plugin
+        state: present
+
+    - name: Installeer rsyslog
+      ansible.builtin.apt:
+        name: rsyslog
+        state: present
+
+    - name: Voeg rsyslog configuratie toe
+      ansible.builtin.blockinfile:
+        path: /etc/rsyslog.conf
+        block: |
+          module(load="imudp")
+          input(type="imudp" port="514")
+
+          $template remote-incoming-logs, "/var/log/remote/%HOSTNAME%.log"
+          *.* ?remote-incoming-logs
+        create: yes
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+
+    - name: Herstart rsyslog service
+      ansible.builtin.service:
+        name: rsyslog
+        state: restarted
+
+    - name: Sta UDP toe voor rsyslog
+      ansible.builtin.ufw:
+        rule: allow
+        port: '514'
+        proto: udp
