@@ -1,0 +1,21 @@
+---
+- name: Update en installeer Nagios
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade alle pakketten
+      ansible.builtin.apt:
+        upgrade: dist
+
+    - name: Installeer Nagios en NRPE
+      ansible.builtin.apt:
+        name:
+          - nagios4
+          - nagios-nrpe-plugin
+        state: present
