@@ -3,8 +3,12 @@
   hosts: myhosts
   become: yes
   tasks:
+    - name: Sla het originele IP-adres op
+      set_fact:
+        original_ip: "{{ ansible_host }}"
+
     - name: Maak een Nagios configuratiebestand
       template:
         src: /pad/naar/server_template.cfg.j2
-        dest: "/etc/nagios4/objects/server{{ ansible_host.split('.')[-1] }}.cfg"
+        dest: "/etc/nagios4/objects/server{{ original_ip.split('.')[-1] }}.cfg"
       delegate_to: localhost
