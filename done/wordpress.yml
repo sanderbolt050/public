@@ -1,5 +1,5 @@
 ---
-- hosts: jouw_wordpress_server
+- hosts: wordpress
   become: yes
   vars:
     mysql_root_password: "jouw_mysql_root_wachtwoord"
@@ -12,7 +12,7 @@
       apt:
         update_cache: yes
 
-    - name: Installeer benodigde pakketten
+    - name: pakketten
       apt:
         name:
           - apache2
@@ -31,20 +31,20 @@
         state: started
         enabled: yes
 
-    - name: Start MySQL service
+    - name: Start MySQL
       service:
         name: mysql
         state: started
         enabled: yes
 
-    - name: Creëer MySQL Database
+    - name:  MySQL DB
       mysql_db:
         name: "{{ mysql_db }}"
         state: present
       become: yes
       become_user: root
 
-    - name: Creëer MySQL Gebruiker
+    - name:  MySQL Gebruiker
       mysql_user:
         name: "{{ mysql_user }}"
         password: "{{ mysql_password }}"
@@ -58,7 +58,7 @@
         url: https://wordpress.org/latest.tar.gz
         dest: /tmp/wordpress.tar.gz
 
-    - name: Pak WordPress uit in de webdirectory
+    - name: Pak WordPress 
       unarchive:
         src: /tmp/wordpress.tar.gz
         dest: /var/www/html/
