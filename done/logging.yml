@@ -1,0 +1,15 @@
+---
+- name: Configure and Restart rsyslog
+  hosts: all
+  become: yes
+  tasks:
+    - name: Add rsyslog forwarding rule
+      lineinfile:
+        path: /etc/rsyslog.conf
+        line: '*.* @10.1.0.16:514'
+        state: present
+
+    - name: Restart rsyslog service
+      systemd:
+        name: rsyslog
+        state: restarted
