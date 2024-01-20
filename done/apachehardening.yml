@@ -1,19 +1,19 @@
 ---
-- name: Update systeem en configureer Apache
+- name: apachehardening
   hosts: all
   become: yes
   tasks:
-    - name: Update en upgrade pakketten
+    - name: Update en upgrade
       apt:
         update_cache: yes
         upgrade: yes
 
-    - name: Installeer Apache
+    - name: install Apache
       apt:
         name: apache2
         state: present
 
-    - name: Verwijder Apache versie-informatie
+    - name: Verwijder apache versie
       lineinfile:
         path: /etc/apache2/conf-available/security.conf
         regexp: '{{ item.regexp }}'
@@ -22,19 +22,19 @@
         - { regexp: '^ServerTokens OS', line: 'ServerTokens Prod' }
         - { regexp: '^ServerSignature On', line: 'ServerSignature Off' }
 
-    - name: Schakel directorybrowsen uit
+    - name: directorybrows
       lineinfile:
         path: /etc/apache2/apache2.conf
         regexp: '^Options Indexes FollowSymLinks'
         line: 'Options FollowSymLinks'
 
-    - name: Schakel SSL-module in en configureer
+    - name: SSL-module
       shell: |
         a2enmod ssl
         a2ensite default-ssl
         sed -i 's/SSLProtocol all -SSLv3/SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1/' /etc/apache2/mods-available/ssl.conf
 
-    - name: Beperk toegestane HTTP-methoden
+    - name: HTTP-methoden
       blockinfile:
         path: /etc/apache2/apache2.conf
         block: |
@@ -47,13 +47,13 @@
           </LimitExcept>
           </Directory>
 
-    - name: Installeer en configureer ModSecurity
+    - name: ModSecurity
       shell: |
         apt-get install libapache2-mod-security2
         mv /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecurity.conf
         sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/modsecurity/modsecurity.conf
 
-    - name: Herstart Apache
+    - name: restart Apache
       systemd:
         name: apache2
         state: restarted
