@@ -1,0 +1,28 @@
+--- 
+- name: Docker installeren
+  hosts: docker
+  become: yes
+  tasks:
+    - name: Pip3 install
+      apt:
+        name: python3-pip
+        state: present
+      become: yes
+    - name: Python install dokcer
+      pip: 
+        name: docker
+        state: present
+      become: yes
+
+    - name: Docker installeren
+      apt:
+        name: docker.io
+        state: latest
+        update_cache: yes          
+    - name: hello-world
+      docker_container:
+        name: ubuntu
+        image: ubuntu
+        state: started
+        
+
