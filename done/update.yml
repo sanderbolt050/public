@@ -1,0 +1,20 @@
+---
+- name: Update Nagios4 en Rsyslog
+  hosts: jouw_target_servers
+  become: yes
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Update Nagios4
+      ansible.builtin.apt:
+        name: nagios4
+        state: latest
+
+    - name: Update Rsyslog
+      ansible.builtin.apt:
+        name: rsyslog
+        state: latest
