@@ -1,0 +1,44 @@
+---
+- hosts: jouw_wordpress_server
+  become: yes
+  tasks:
+    - name: Installeer Apache en PHP
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - apache2
+          - php
+          - php-mysql
+          - libapache2-mod-php
+          - php-cli
+          - php-cgi
+          - php-gd
+
+    - name: Creëer MySQL Database voor WordPress
+      mysql_db:
+        name: wordpress_db
+        state: present
+
+    - name: Creëer MySQL Gebruiker voor WordPress
+      mysql_user:
+        name: wordpress_user
+        password: jouw_wachtwoord
+        priv: "wordpress_db.*:ALL"
+        state: present
+
+    - name: Download en Installeer WordPress
+      get_url:
+        url: https://wordpress.org/latest.tar.gz
+        dest: /tmp/wordpress.tar.gz
+      unarchive:
+        src: /tmp/wordpress.tar.gz
+        dest: /var/www/html/
+        remote_src: yes
+
+    - name: Configureer WordPress
+      template:
+        src: wp-config.php.j2
+        dest: /var/www/html/wordpress/wp-config.php
+
+    # ... Voeg hier eventueel meer taken toe, zoals het configureren van Apache ...
