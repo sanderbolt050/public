@@ -1,0 +1,73 @@
+---
+- name: Update, upgrade en installeer benodigde pakketten
+  hosts: localhost
+  become: yes
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade alle pakketten
+      ansible.builtin.apt:
+        upgrade: dist
+
+    - name: Installeer Nagios en NRPE
+      ansible.builtin.apt:
+        name:
+          - nagios4
+          - nagios-nrpe-plugin
+        state: present
+
+    - name: Installeer rsyslog
+      ansible.builtin.apt:
+        name: rsyslog
+        state: present
+
+    - name: Voeg rsyslog configuratie toe
+      ansible.builtin.blockinfile:
+        path: /etc/rsyslog.conf
+        block: |
+          module(load="imudp")
+          input(type="imudp" port="514")
+
+          $template remote-incoming-logs, "/var/log/remote/%HOSTNAME%.log"
+          *.* ?remote-incoming-logs
+        create: yes
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+
+    - name: Herstart rsyslog service
+      ansible.builtin.service:
+        name: rsyslog
+        state: restarted
+
+    - name: Sta UDP toe voor rsyslog
+      ansible.builtin.ufw:
+        rule: allow
+        port: '514'
+        proto: udp
+        
+    - name: Verplaats Nagios Apache configuratie naar .old
+      ansible.builtin.command:
+        cmd: mv /etc/apache2/conf-available/nagios4-cgi.conf /etc/apache2/conf-available/nagios4-cgi.conf.old
+        removes: /etc/apache2/conf-available/nagios4-cgi.conf
+        creates: /etc/apache2/conf-available/nagios4-cgi.conf.old
+
+    - name: Maak nieuw Nagios Apache configuratiebestand
+      ansible.builtin.copy:
+        dest: /etc/apache2/conf-available/nagios4-cgi.conf
+        content: |
+          ScriptAlias /cgi-bin/nagios4 /usr/lib/cgi-bin/nagios4
+          ScriptAlias /nagios4/cgi-bin /usr/lib/cgi-bin/nagios4
+          Alias /nagios4/stylesheets /etc/nagios4/stylesheets
+          Alias /nagios4 /usr/share/nagios4/htdocs
+          <DirectoryMatch (/usr/share/nagios4/htdocs|/usr/lib/cgi-bin/nagios4|/etc/nagios4/stylesheets)>
+             Options FollowSymLinks
+             DirectoryIndex index.php index.html
+             AllowOverride AuthConfig
+             Require ip  ::1/128 fc00::/7 fe80::/10 10.0.0.0/8 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.168.0.0/16
+          </DirectoryMatch>
+          <Directory /usr/share/nagios4/htdocs>
+             Options +ExecCGI
+          </Directory>
