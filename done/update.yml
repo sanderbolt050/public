@@ -1,6 +1,6 @@
 ---
 - name: Update Nagios4 en Rsyslog
-  hosts: jouw_target_servers
+  hosts: all
   become: yes
 
   tasks:
