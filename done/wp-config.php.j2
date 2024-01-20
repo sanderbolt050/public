@@ -1,0 +1,25 @@
+<?php
+define('DB_NAME', '{{ mysql_db }}');
+define('DB_USER', '{{ mysql_user }}');
+define('DB_PASSWORD', '{{ mysql_password }}');
+define('DB_HOST', 'localhost');
+define('DB_CHARSET', 'utf8');
+define('DB_COLLATE', '');
+
+// Voeg unieke sleutels en zouten toe (Je kunt deze genereren op https://api.wordpress.org/secret-key/1.1/salt/)
+define('AUTH_KEY',         'vervang_dit_met_jouw_unieke_frase');
+define('SECURE_AUTH_KEY',  'vervang_dit_met_jouw_unieke_frase');
+define('LOGGED_IN_KEY',    'vervang_dit_met_jouw_unieke_frase');
+define('NONCE_KEY',        'vervang_dit_met_jouw_unieke_frase');
+define('AUTH_SALT',        'vervang_dit_met_jouw_unieke_frase');
+define('SECURE_AUTH_SALT', 'vervang_dit_met_jouw_unieke_frase');
+define('LOGGED_IN_SALT',   'vervang_dit_met_jouw_unieke_frase');
+define('NONCE_SALT',       'vervang_dit_met_jouw_unieke_frase');
+
+$table_prefix = 'wp_';
+
+define('WP_DEBUG', false);
+
+if ( !defined('ABSPATH') )
+    define('ABSPATH', dirname(__FILE__) . '/');
+require_once(ABSPATH . 'wp-settings.php');
