@@ -1,5 +1,5 @@
 ---
-- name: Update, upgrade en installeer benodigde pakketten
+- name: syslog, nagios4 en config
   hosts: localhost
   become: yes
 
@@ -9,23 +9,23 @@
         update_cache: yes
         cache_valid_time: 3600
 
-    - name: Upgrade alle pakketten
+    - name: Upgrade
       ansible.builtin.apt:
         upgrade: dist
 
-    - name: Installeer Nagios en NRPE
+    - name: Nagios en NRPE
       ansible.builtin.apt:
         name:
           - nagios4
           - nagios-nrpe-plugin
         state: present
 
-    - name: Installeer rsyslog
+    - name: rsyslog
       ansible.builtin.apt:
         name: rsyslog
         state: present
 
-    - name: Voeg rsyslog configuratie toe
+    - name: rsyslog
       ansible.builtin.blockinfile:
         path: /etc/rsyslog.conf
         block: |
@@ -37,7 +37,7 @@
         create: yes
         marker: "# {mark} ANSIBLE MANAGED BLOCK"
 
-    - name: Herstart rsyslog service
+    - name: Herstart rsyslog
       ansible.builtin.service:
         name: rsyslog
         state: restarted
@@ -48,13 +48,13 @@
         port: '514'
         proto: udp
         
-    - name: Verplaats Nagios Apache configuratie naar .old
+    - name: backup config
       ansible.builtin.command:
         cmd: mv /etc/apache2/conf-available/nagios4-cgi.conf /etc/apache2/conf-available/nagios4-cgi.conf.old
         removes: /etc/apache2/conf-available/nagios4-cgi.conf
         creates: /etc/apache2/conf-available/nagios4-cgi.conf.old
 
-    - name: Maak nieuw Nagios Apache configuratiebestand
+    - name: copy demo file
       ansible.builtin.copy:
         dest: /etc/apache2/conf-available/nagios4-cgi.conf
         content: |
